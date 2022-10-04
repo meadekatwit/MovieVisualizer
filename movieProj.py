@@ -2,49 +2,64 @@ import requests, csv
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 
-def downloadImg(link, i):
+def downloadImg(link, i, imageLoc):
     response = requests.get(link[4].split("\n")[0]).content
     imgLink = str(response).split('{"image":"')[1].split("?")[0]
 
     url = imgLink #Download Image
     r = requests.get(url)
-    with open("IMAGES/" + str(i) + ".jpg", 'wb') as f:
+    with open(imageLoc + str(i) + ".jpg", 'wb') as f:
         f.write(r.content)
 
 def getTitle(response, i):
     title = str(response).split('<meta property="og:title" content="')[1].split('"')[0]
     return title.replace("&#039;", "'")
      
-def loadData():
+def loadData(listFile, reviewFile):
+    #data[0] = Movie Title
+    #data[1] = Movie Year
+    #data[2] = Score
+    #data[3] = Review
+    #data[4] = Link
+    #data[5] = Date
+    
     # opening the CSV file
-    with open('kyle-watches-a-movie-every-day-in-2022.csv', mode ='r', encoding="latin-1")as file:
+
+    with open(reviewFile, mode ='r', encoding='utf-8')as lenFile:
+        csvFile = csv.reader(lenFile)
+        csvLen = 0
+        for lines in csvFile:
+            csvLen += 1
+        #print(csvLen)
+    
+    with open(listFile, mode ='r', encoding="latin-1")as file:
        
       # reading the CSV file
       csvFile = csv.reader(file)
      
       i = 0
-      yearList = [["", "", "", "", ""] for i in range(370)]
+      movieList = [["", "", "", "", ""] for i in range(csvLen)]
       for lines in csvFile:
           if (i > 4):
-              yearList[i-5] = lines
+              movieList[i-5] = lines
           i+=1
 
     # opening the CSV file
-    with open('reviews.csv', mode ='r', encoding='utf-8')as file2:
+    with open(reviewFile, mode ='r', encoding='utf-8')as file2:
        
       # reading the CSV file
       csvFile2 = csv.reader(file2)
      
       i = 0
-      reviews = [["","","","","",""] for i in range(370)]
+      reviews = [["","","","","",""] for i in range(csvLen)]
       for lines in csvFile2:
           i+=1
           if (i > 1):
               reviews[i-2] = lines
 
-    data = [["", "", "", "", "", ""] for i in range(370)]
+    data = [["", "", "", "", "", ""] for i in range(csvLen)]
     i = 0
-    for movie in yearList:
+    for movie in movieList:
         data[i][0] = movie[1] #Name
         data[i][1] = movie[2] #Year
         data[i][4] = movie[3] #Link
@@ -52,11 +67,11 @@ def loadData():
         i+=1
 
     for movie in reviews:
-        #print(movie[3])
         inList = False
         if(movie[1] != ""):
             for point in data:
                 if(point[0] == movie[1] and point[1] == movie[2]):
+                    #print(point[0])
                     inList = True
                     point[2] = movie[4] #Score
                     point[3] = movie[6].replace("<i>","").replace("</i>","") #Review
@@ -80,11 +95,11 @@ def loadData():
             #print(point[0] + " has no date")
 
     
-    data.sort(key=lambda x: x[5]) #Sort data by when inputted
+    
     return data
 
-def generateGraphic(data, i):
-    poster = Image.open("IMAGES/" + str(i) + ".jpg") #Put image on poster
+def generateGraphic(data, i, imageLoc, graphicLoc):
+    poster = Image.open(imageLoc + str(i) + ".jpg") #Put image on poster
     poster = poster.resize((690, 1035))
     canvas = Image.new('RGB', (1840, 1035))
     canvas.paste(poster, (0,0))
@@ -132,19 +147,23 @@ def generateGraphic(data, i):
     canvas.paste(reviewIMG, (690,1035-150))
     
     #canvas.show()
-    canvas = canvas.save("GRAPHICS/" + str(i) + ".jpg") #Save to file
+    canvas = canvas.save(graphicLoc + str(i) + ".jpg") #Save to file
 
 def main():
-    data = loadData()
+    data = loadData('kyle-watches-a-movie-every-day-in-2022.csv', 'reviews.csv')
     
     i = 0
+
+    imageLoc = "IMAGES/"
+    graphicLoc = "GRAPHICS/"
     
     for link in data:
         #link[3] = link[4].split("\n")[0]
         if (data[i][0] != ""):
-            print("Generating <" + str(data[i][0]) + ">")
-            #downloadImg(link, i) #Download images
-            #generateGraphic(data, i) #Generate Graphics
+            #print("Generating <" + str(data[i][0]) + ">")
+            #downloadImg(link, i, imageLoc) #Download images
+            #generateGraphic(data, i, imageLoc, graphicLoc) #Generate Graphics
+            pass
         i += 1
 
     return data
