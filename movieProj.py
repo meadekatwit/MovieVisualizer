@@ -94,9 +94,13 @@ def loadData(listFile, reviewFile):
             point[5] = datetime.strptime("9999-01-01", "%Y-%m-%d")
             #print(point[0] + " has no date")
 
+    trimmedData = []
+    for point in data:
+        if (point[0] != ""):
+            trimmedData.append(point)
     
     
-    return data
+    return trimmedData
 
 def generateGraphic(data, i, imageLoc, graphicLoc):
     poster = Image.open(imageLoc + str(i) + ".jpg") #Put image on poster
@@ -149,6 +153,13 @@ def generateGraphic(data, i, imageLoc, graphicLoc):
     #canvas.show()
     canvas = canvas.save(graphicLoc + str(i) + ".jpg") #Save to file
 
+def preview(data, i, imageLoc, graphicLoc):
+    downloadImg(data[i], i, imageLoc)
+    generateGraphic(data, i, imageLoc, graphicLoc)
+    im = Image.open(graphicLoc + str(i) + ".jpg")
+    im.show()
+    
+
 def main():
     data = loadData('kyle-watches-a-movie-every-day-in-2022.csv', 'reviews.csv')
     
@@ -157,15 +168,17 @@ def main():
     imageLoc = "IMAGES/"
     graphicLoc = "GRAPHICS/"
     
-    for link in data:
+    
+    #for link in data:
         #link[3] = link[4].split("\n")[0]
-        if (data[i][0] != ""):
+        #if (data[i][0] != ""):
             #print("Generating <" + str(data[i][0]) + ">")
             #downloadImg(link, i, imageLoc) #Download images
             #generateGraphic(data, i, imageLoc, graphicLoc) #Generate Graphics
-            pass
-        i += 1
+            #pass
+        #i += 1
 
+    preview(data, 0, imageLoc, graphicLoc)
     return data
 
-data = main()
+#data = main()
