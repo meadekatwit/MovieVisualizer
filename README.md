@@ -2,6 +2,8 @@
 Simple program to read letterboxd list and reviews and convert them to a series of images to be used in bulk reviews.
 
 ## Usage
+Run "GUI.py"
+
 Select the following files:
 * Reviews file from letterboxd
 * List file from letterboxd
