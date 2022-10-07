@@ -8,14 +8,14 @@ def downloadImg(link, i, imageLoc):
 
     url = imgLink #Download Image
     r = requests.get(url)
-    with open(imageLoc + str(i) + ".jpg", 'wb') as f:
+    with open(imageLoc + "poster_" + str(i) + ".jpg", 'wb') as f:
         f.write(r.content)
 
 def getTitle(response, i):
     title = str(response).split('<meta property="og:title" content="')[1].split('"')[0]
     return title.replace("&#039;", "'")
      
-def loadData(listFile, reviewFile):
+def loadData(listFile, reviewFile, singular = -1):
     #data[0] = Movie Title
     #data[1] = Movie Year
     #data[2] = Score
@@ -59,6 +59,10 @@ def loadData(listFile, reviewFile):
 
     data = [["", "", "", "", "", ""] for i in range(csvLen)]
     i = 0
+
+    if (singular != -1):
+        movieList = [movieList[singular]]
+    
     for movie in movieList:
         data[i][0] = movie[1] #Name
         data[i][1] = movie[2] #Year
@@ -102,14 +106,14 @@ def loadData(listFile, reviewFile):
     
     return trimmedData
 
-def generateGraphic(data, i, imageLoc, graphicLoc):
-    poster = Image.open(imageLoc + str(i) + ".jpg") #Put image on poster
+def generateGraphic(data, i, imageLoc, graphicLoc, colors = ["yellow", "yellow", "yellow"]):
+    poster = Image.open(imageLoc + "poster_" + str(i) + ".jpg") #Put image on poster
     poster = poster.resize((690, 1035))
     canvas = Image.new('RGB', (1840, 1035))
     canvas.paste(poster, (0,0))
 
 #------------------------    
-    titleIMG = Image.new("RGBA",(1150,200),"yellow") #Generate Title
+    titleIMG = Image.new("RGBA",(1150,200),colors[0]) #Generate Title
     title = data[i][0] + " (" + data[i][1] + ")"
     draw = ImageDraw.Draw(titleIMG)
     
@@ -124,7 +128,7 @@ def generateGraphic(data, i, imageLoc, graphicLoc):
     draw.text(((1150-w)/2,(200-h)/2), title, fill="black", font=titleFont)
     canvas.paste(titleIMG, (690,0))
 #------------------------
-    scoreIMG = Image.new("RGBA",(1150,100),color = (50, 50, 50)) #Generate Score
+    scoreIMG = Image.new("RGBA",(1150,100),color = colors[1]) #Generate Score
     scoreFont = ImageFont.truetype("C:\Windows\Fonts\comicbd.ttf", 40)
     if(data[i][2] != ''):
         score = str(int(float(data[i][2])*2)) + " / 10"
@@ -132,10 +136,10 @@ def generateGraphic(data, i, imageLoc, graphicLoc):
         score = "N/A"
     draw2 = ImageDraw.Draw(scoreIMG)
     w, h = draw.textsize(score, font=scoreFont)
-    draw2.text(((1150-w)/2,(100-h)/2), score, fill="white", font=scoreFont)
+    draw2.text(((1150-w)/2,(100-h)/2), score, fill="black", font=scoreFont)
     canvas.paste(scoreIMG, (690,1035-250))
 #------------------------
-    reviewIMG = Image.new("RGBA",(1150,150),color = (20, 20, 20)) #Generate Review
+    reviewIMG = Image.new("RGBA",(1150,150),color = colors[2]) #Generate Review
     review = data[i][3]
     draw3 = ImageDraw.Draw(reviewIMG)
     
@@ -147,7 +151,7 @@ def generateGraphic(data, i, imageLoc, graphicLoc):
         w, h = draw.textsize(review, font=reviewFont)
         size -= 1
 
-    draw3.text(((1150-w)/2,(150-h)/2), review, fill="white", font=reviewFont)
+    draw3.text(((1150-w)/2,(150-h)/2), review, fill="black", font=reviewFont)
     canvas.paste(reviewIMG, (690,1035-150))
     
     #canvas.show()
@@ -161,24 +165,13 @@ def preview(data, i, imageLoc, graphicLoc):
     
 
 def main():
-    data = loadData('kyle-watches-a-movie-every-day-in-2022.csv', 'reviews.csv')
+    data = loadData('kyle-watches-a-movie-every-day-in-2022.csv', 'reviews.csv', singular = 2)
     
     i = 0
 
     imageLoc = "IMAGES/"
     graphicLoc = "GRAPHICS/"
-    
-    
-    #for link in data:
-        #link[3] = link[4].split("\n")[0]
-        #if (data[i][0] != ""):
-            #print("Generating <" + str(data[i][0]) + ">")
-            #downloadImg(link, i, imageLoc) #Download images
-            #generateGraphic(data, i, imageLoc, graphicLoc) #Generate Graphics
-            #pass
-        #i += 1
 
-    preview(data, 0, imageLoc, graphicLoc)
     return data
 
 #data = main()
